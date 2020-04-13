@@ -2,10 +2,9 @@ module Game where
 
 import Data.Array
 
-data Player = PlayerX | PlayerO
+data Player = PlayerX | PlayerO deriving (Eq, Show)
 type Cell = Maybe Player
-data State = Running | EndGame
-data EndGame = Draw | Player
+data State = Running | EndGame (Maybe Player)
 
 type Field = Array (Int, Int) Cell
 
