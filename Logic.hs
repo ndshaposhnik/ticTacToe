@@ -23,11 +23,8 @@ getRow :: Float -> Int
 getRow f = ff `div` (screenSize `div` n)
          where ff = floor f + screenSize `div` 2
 
-safeGetRow :: Float -> Int
-safeGetRow x = min (n - 1) $ getRow x
-
 posToCoord :: (Float, Float) -> (Int, Int)
-posToCoord (a, b) = (safeGetRow a, safeGetRow b)
+posToCoord (a, b) = (getRow a, getRow b)
 
 changePlayer :: Player -> Player
 changePlayer PlayerX = PlayerO
@@ -68,11 +65,16 @@ nextTurn (Game field state player) = case isWinner field player of
         True -> Game field (EndGame Nothing) player
         _    -> Game field state (changePlayer player)
 
+isValid :: (Int, Int) -> Bool
+isValid (a, b) = 0 <= a && a < n && 0 <= b && b < n
+
 updateGame :: Event -> Game -> Game
-updateGame (EventKey (MouseButton LeftButton) Up _ position) (Game field state player) = case state of
-    EndGame _ -> initialGame
-    Running   -> case field ! key of
-        Nothing -> nextTurn $ Game (field // [(key, Just player)]) state player
-        _ -> Game field state player
-        where key = posToCoord position
+updateGame (EventKey (MouseButton LeftButton) Up _ position) (Game field state player) = case isValid key of
+    True -> case state of
+        EndGame _ -> initialGame
+        Running   -> case field ! key of
+            Nothing -> nextTurn $ Game (field // [(key, Just player)]) state player
+            _ -> Game field state player
+    False -> Game field state player
+    where key = posToCoord position
 updateGame _ game = game
