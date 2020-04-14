@@ -9,6 +9,9 @@ import Game
 size :: Float
 size = fromIntegral screenSize
 
+cell :: Float
+cell = size / fromIntegral n
+
 fps :: Int
 fps = 30
 
@@ -25,24 +28,23 @@ colorGrid :: Color
 colorGrid = greyN 0.5
 
 drawGrid :: Picture
-drawGrid = color colorGrid $ Pictures [line [(size / 6, size / 2), (size / 6, -size / 2)],
-                                       line [(-size / 6, size / 2), (-size / 6, -size / 2)],
-                                       line [(-size / 2, size / 6), (size / 2, size / 6)],
-                                       line [(-size / 2, -size / 6), (size / 2, -size / 6)]]
+drawGrid = color colorGrid $ Pictures $ map (\x -> line [(x, -size / 2), (x, size / 2)]) points
+                                     ++ map (\x -> line [(-size / 2, x), (size / 2, x)]) points
+                                     where points = [-size / 2 + (fromIntegral i) * cell | i <- [0..n]]
 
 getShift :: Int -> Float
-getShift x = -size / 3 + (fromIntegral x) * (size / 3)
+getShift x = -cell * (fromIntegral (n - 1)) / 2 + (fromIntegral x) * cell
 
 drawX :: (Int, Int) -> Color -> Picture
-drawX (x, y) c = translate (getShift x) (getShift y) $ color c $ 
-                    Pictures [line [(-sizen, -sizen), (sizen, sizen)],
-                              line [(-sizen, sizen), (sizen, -sizen)]] where
-                                sizen = 50
-
+drawX (x, y) c = translate (getShift x) (getShift y) $ color c $ Pictures [rotate 45 p, rotate (-45) p] where
+    p = Polygon [(-w, -h), (-w, h), (w, h), (w, -h)]
+    w = 0.5  * cell
+    h = 0.05 * cell
 
 drawO :: (Int, Int) -> Color -> Picture
-drawO (x, y) c = color c $ translate (getShift x) (getShift y) $ ThickCircle (sizen) (5) where
-                                sizen = 45
+drawO (x, y) c = color c $ translate (getShift x) (getShift y) $ ThickCircle rad thick where
+    rad   = 0.4  * cell
+    thick = 0.08 * cell
 
 getColor :: (Int, Int) -> Game -> Color
 getColor key (Game field state _) = case state of
@@ -61,7 +63,6 @@ drawCell key (Game field state _) = case field ! key of
     Just PlayerO -> drawO key $ getColor key game
     Nothing -> Blank
     where game = Game field state undefined
-
 
 drawField :: Game -> Picture
 drawField game = Pictures [drawCell key game | key <- range ((0, 0), (n - 1, n - 1))]

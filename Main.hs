@@ -1,7 +1,6 @@
 module Main where
 
 import Graphics.Gloss
-import Graphics.Gloss.Data.Color
 
 import Game (screenSize, Game)
 import Logic (initialGame, updateGame)

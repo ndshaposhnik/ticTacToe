@@ -2,37 +2,39 @@ module Logic where
 
 import Data.Array
 import Graphics.Gloss.Interface.IO.Interact
-import Graphics.Gloss.Interface.Pure.Game
 
 import Game
 
 rangeI :: [Int]
-rangeI = [0..(n - 1)]
+rangeI = range (0, (n - 1))
+
+rangePair :: [(Int, Int)]
+rangePair = range ((0, 0), (n - 1, (n - 1)))
 
 initialGame :: Game
-initialGame = Game { field = array rangePair listVal, 
+initialGame = Game { field = array rangeField listVal, 
                      state = Running, 
                      currentPlayer = PlayerX } where
-    rangePair = ((0, 0), (n - 1, n - 1))
-    listVal = [((i, j), Nothing) | i <- rangeI, j <- rangeI]
+    rangeField = ((0,0), (n - 1, n - 1))
+    listVal = [(key, Nothing) | key <- rangePair]
 
-
-size :: Float
-size = fromIntegral screenSize
 
 getRow :: Float -> Int
 getRow f = ff `div` (screenSize `div` n)
-         where ff = floor (f + size / 2)
+         where ff = floor f + screenSize `div` 2
+
+safeGetRow :: Float -> Int
+safeGetRow x = min (n - 1) $ getRow x
 
 posToCoord :: (Float, Float) -> (Int, Int)
-posToCoord (a, b) = (min (n - 1) $ getRow a, min (n - 1) $ getRow b)
+posToCoord (a, b) = (safeGetRow a, safeGetRow b)
 
 changePlayer :: Player -> Player
 changePlayer PlayerX = PlayerO
 changePlayer PlayerO = PlayerX
 
 sumAll :: Field -> Int
-sumAll field = sum $ map (\x -> if x == Nothing then 0 else 1) [field ! (i, j) | i <- rangeI, j <- rangeI]
+sumAll field = sum $ map (\x -> if x == Nothing then 0 else 1) [field ! key | key <- rangePair]
 
 sumLine :: [Cell] -> Player -> Int
 sumLine ps player = sum $ map (\p -> if p == Just player then 1 else 0) ps
