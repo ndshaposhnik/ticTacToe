@@ -2,6 +2,7 @@ module Logic where
 
 import Data.Array
 import Graphics.Gloss.Interface.IO.Interact
+import Graphics.Gloss.Interface.Pure.Game
 
 import Game
 
@@ -12,20 +13,16 @@ initialGame :: Game
 initialGame = Game { field = array rangePair listVal, 
                      state = Running, 
                      currentPlayer = PlayerX } where
-    rangePair = ((0, 0), (n, n))
+    rangePair = ((0, 0), (n - 1, n - 1))
     listVal = [((i, j), Nothing) | i <- rangeI, j <- rangeI]
 
 
 getRow :: Float -> Int
-getRow f | (floor f) == screenHeight = n - 1
-         | otherwise = (floor f) `div` (screenHeight `div` n)
-
-getColumn :: Float -> Int
-getColumn f | floor f == screenWidth = n - 1
-            | otherwise = (floor f) `div` (screenWidth `div` n)
+getRow f | (floor f) == screenSize = n - 1
+         | otherwise = (floor f) `div` (screenSize `div` n)
 
 posToCoord :: (Float, Float) -> (Int, Int)
-posToCoord (a, b) = (getRow a, getColumn b)
+posToCoord (a, b) = (getRow a, getRow b)
 
 changePlayer :: Player -> Player
 changePlayer PlayerX = PlayerO
@@ -57,7 +54,7 @@ countSideDiag field = sumLine [field ! (i, n - i - 1) | i <- rangeI]
 
 isWinner :: Field -> Player -> Bool
 isWinner field player = (maximum $ (countRows field player) ++ (countColumns field player) ++ 
-                                  [countMainDiag field player, countSideDiag field player]) == n
+                                     [countMainDiag field player, countSideDiag field player]) == n
 
 nextTurn :: Game -> Game
 nextTurn (Game field state player) = case isWinner field player of
@@ -73,4 +70,4 @@ updateGame (EventKey (MouseButton LeftButton) Up _ position) (Game field state p
         Nothing -> nextTurn $ Game (field // [(key, Just player)]) state player
         _ -> Game field state player
         where key = posToCoord position
-
+updateGame _ game = game

@@ -3,11 +3,17 @@ module Main where
 import Graphics.Gloss
 import Graphics.Gloss.Data.Color
 
-import Game
-import Logic
-import Rendering
+import Game (screenSize, Game)
+import Logic (initialGame, updateGame)
+import Rendering (backgroundColor, fps, drawWorld)
 
-window = InWindow "Tic Tac Toe" (screenWidth, screenHeight) (screenPosX, screenPosY)
+screenPosX :: Int
+screenPosX = 100
+
+screenPosY :: Int
+screenPosY = 200
+
+window = InWindow "Tic Tac Toe" (screenSize, screenSize) (screenPosY, screenPosX)
 
 main :: IO ()
 main = play window backgroundColor fps initialGame drawWorld updateGame (const id)

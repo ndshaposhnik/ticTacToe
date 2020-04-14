@@ -10,11 +10,8 @@ type Field = Array (Int, Int) Cell
 
 data Game = Game { field :: Field, state :: State, currentPlayer :: Player }
 
-screenWidth :: Int
-screenWidth = 600
-
-screenHeight :: Int
-screenHeight = 600
+screenSize :: Int
+screenSize = 300
 
 n :: Int
 n = 3
