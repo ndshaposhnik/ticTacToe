@@ -17,12 +17,15 @@ initialGame = Game { field = array rangePair listVal,
     listVal = [((i, j), Nothing) | i <- rangeI, j <- rangeI]
 
 
+size :: Float
+size = fromIntegral screenSize
+
 getRow :: Float -> Int
-getRow f | (floor f) == screenSize = n - 1
-         | otherwise = (floor f) `div` (screenSize `div` n)
+getRow f = ff `div` (screenSize `div` n)
+         where ff = floor (f + size / 2)
 
 posToCoord :: (Float, Float) -> (Int, Int)
-posToCoord (a, b) = (getRow a, getRow b)
+posToCoord (a, b) = (min (n - 1) $ getRow a, min (n - 1) $ getRow b)
 
 changePlayer :: Player -> Player
 changePlayer PlayerX = PlayerO

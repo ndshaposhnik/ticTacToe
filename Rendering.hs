@@ -31,16 +31,18 @@ drawGrid = color colorGrid $ Pictures [line [(size / 6, size / 2), (size / 6, -s
                                        line [(-size / 2, -size / 6), (size / 2, -size / 6)]]
 
 getShift :: Int -> Float
-getShift x = -2 * size / 3 + (fromIntegral x) * size
+getShift x = -size / 3 + (fromIntegral x) * (size / 3)
 
 drawX :: (Int, Int) -> Color -> Picture
 drawX (x, y) c = translate (getShift x) (getShift y) $ color c $ 
-                    Pictures [line [(-size * 0.45, -size * 0.45), (size * 0.45, size * 0.45)],
-                              line [(-size * 0.45, size * 0.45), (size * 0.45, -size * 0.45)]]
+                    Pictures [line [(-sizen, -sizen), (sizen, sizen)],
+                              line [(-sizen, sizen), (sizen, -sizen)]] where
+                                sizen = 50
 
 
 drawO :: (Int, Int) -> Color -> Picture
-drawO (x, y) c = color c $ translate (getShift x) (getShift y) $ ThickCircle (size * 0.45) (size * 0.05)
+drawO (x, y) c = color c $ translate (getShift x) (getShift y) $ ThickCircle (sizen) (5) where
+                                sizen = 45
 
 getColor :: (Int, Int) -> Game -> Color
 getColor key (Game field state _) = case state of
@@ -66,4 +68,4 @@ drawField game = Pictures [drawCell key game | key <- range ((0, 0), (n - 1, n -
 
 drawWorld :: Game -> Picture
 drawWorld game = Pictures pictures where
-    pictures = [drawGrid]
+    pictures = [drawGrid, drawField game]
