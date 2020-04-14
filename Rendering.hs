@@ -35,42 +35,42 @@ drawGrid col = color col $ Pictures $ map (\x -> line [(x, -size / 2), (x, size 
 getShift :: Int -> Float
 getShift x = -cell * (fromIntegral (n - 1)) / 2 + (fromIntegral x) * cell
 
-drawX :: (Int, Int) -> Color -> Picture
-drawX (x, y) c = translate (getShift x) (getShift y) $ color c $ Pictures [rotate 45 p, rotate (-45) p] where
+drawX :: (Int, Int) -> Picture
+drawX (x, y) = translate (getShift x) (getShift y) $ Pictures [rotate 45 p, rotate (-45) p] where
     p = Polygon [(-w, -h), (-w, h), (w, h), (w, -h)]
     w = 0.5  * cell
     h = 0.05 * cell
 
-drawO :: (Int, Int) -> Color -> Picture
-drawO (x, y) c = color c $ translate (getShift x) (getShift y) $ ThickCircle rad thick where
+drawO :: (Int, Int) -> Picture
+drawO (x, y) = translate (getShift x) (getShift y) $ ThickCircle rad thick where
     rad   = 0.4  * cell
     thick = 0.08 * cell
 
 drawCellRunning :: (Int, Int) -> Field -> Picture
 drawCellRunning key field = case field ! key of
-    Just PlayerX -> drawX key colorX
-    Just PlayerO -> drawO key colorO
-    Nothing -> Blank
+    Just PlayerX -> color colorX $ drawX key
+    Just PlayerO -> color colorO $ drawO key
+    Nothing      -> Blank
 
-drawCellEnd :: (Int, Int) -> Field -> Color -> Picture
-drawCellEnd key field col = case field ! key of
-    Just PlayerX -> drawX key col
-    Just PlayerO -> drawO key col
+drawCellEnd :: (Int, Int) -> Field -> Picture
+drawCellEnd key field = case field ! key of
+    Just PlayerX -> drawX key
+    Just PlayerO -> drawO key
     Nothing -> Blank
 
 drawFieldRunning :: Field -> Picture
 drawFieldRunning field = Pictures [drawCellRunning key field | key <- range ((0, 0), (n - 1, n - 1))]
 
 drawFieldEnd :: Field -> Color -> Picture
-drawFieldEnd field col = Pictures [drawCellEnd key field col | key <- range ((0, 0), (n - 1, n - 1))]
+drawFieldEnd field col = color col $ Pictures [drawCellEnd key field | key <- range ((0, 0), (n - 1, n - 1))]
 
-playerToColor :: Player -> Color
-playerToColor PlayerX = colorX
-playerToColor PlayerO = colorO
+playerToColor :: Maybe Player -> Color
+playerToColor (Just PlayerX) = colorX
+playerToColor (Just PlayerO) = colorO
+playerToColor Nothing = colorGrid
 
 drawWorld :: Game -> Picture
-drawWorld (Game field state _) = case state of
-    Running               -> Pictures [drawGrid colorGrid, drawFieldRunning field]
-    EndGame Nothing       -> Pictures [drawGrid colorGrid, drawFieldEnd field colorGrid]
-    EndGame (Just player) -> Pictures [drawGrid color    , drawFieldEnd field color] 
-        where color = playerToColor player
+drawWorld (Game field state _) = Pictures $ case state of
+    Running        -> [drawGrid colorGrid, drawFieldRunning field]
+    EndGame player -> [drawGrid colorP   , drawFieldEnd field colorP] 
+        where colorP = playerToColor player
